@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 4b - Question 2: JSON Fetch</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 24px;
+      line-height: 1.6;
+    }
+    .card {
+      border: 1px solid #ddd;
+      padding: 16px;
+      margin-bottom: 16px;
+      border-radius: 6px;
+    }
+    .error-box {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      padding: 12px;
+      border-radius: 4px;
+      display: none;
+    }
+    ul {
+      margin: 8px 0 0 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Lab 4b: Retrieve and Display JSON Data</h1>
+
+  <div id="error-message" class="error-box"></div>
+
+  <div class="card">
+    <h3>(a) Title of First Book</h3>
+    <p id="first-book-title">Loading...</p>
+  </div>
+
+  <div class="card">
+    <h3>(b) Author of Second Book</h3>
+    <p id="second-book-author">Loading...</p>
+  </div>
+
+  <div class="card">
+    <h3>(c) Genres Grouped by Book Title</h3>
+    <ul id="genres-list"></ul>
+  </div>
+
+  <script>
+    async function loadBooks() {
+      const errorDiv = document.getElementById("error-message");
+      try {
+        const response = await fetch("books.json");
+        
+        if (!response.ok) {
+          throw new Error(`HTTP network error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+
+        if (!data.books || !Array.isArray(data.books) || data.books.length < 2) {
+          throw new Error("Invalid JSON structure: Missing expected 'books' array.");
+        }
+
+        const titleEl = document.getElementById("first-book-title");
+        titleEl.textContent = data.books[0].title;
+
+        const authorEl = document.getElementById("second-book-author");
+        authorEl.textContent = data.books[1].author;
+
+        const genresListEl = document.getElementById("genres-list");
+        genresListEl.innerHTML = ""; // Clear initial state
+
+        data.books.forEach(book => {
+          const listItem = document.createElement("li");
+          const genresString = Array.isArray(book.genres) ? book.genres.join(", ") : "N/A";
+          listItem.textContent = `${book.title}: ${genresString}`;
+          genresListEl.appendChild(listItem);
+        });
+
+      } catch (error) {
+        errorDiv.style.display = "block";
+        errorDiv.textContent = `Unable to display data: ${error.message}`;
+        console.error("Fetch Error:", error);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadBooks);
+  </script>
+
+</body>
+</html>
